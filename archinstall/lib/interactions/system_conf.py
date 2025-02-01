@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from archinstall.tui import Alignment, FrameProperties, FrameStyle, MenuItem, MenuItemGroup, Orientation, PreviewStyle, ResultType, SelectMenu, TextInput, EditMenu
+from archinstall.tui import Alignment, FrameProperties, FrameStyle, MenuItem, MenuItemGroup, Orientation, PreviewStyle, ResultType, SelectMenu, EditMenu
 
 from ..hardware import GfxDriver, SysInfo
 from ..models.bootloader import Bootloader
