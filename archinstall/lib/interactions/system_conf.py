@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from archinstall.tui import Alignment, FrameProperties, FrameStyle, MenuItem, MenuItemGroup, Orientation, PreviewStyle, ResultType, SelectMenu
+from archinstall.tui import Alignment, FrameProperties, FrameStyle, MenuItem, MenuItemGroup, Orientation, PreviewStyle, ResultType, SelectMenu, TextInput, EditMenu
 
 from ..hardware import GfxDriver, SysInfo
 from ..models.bootloader import Bootloader
+from ..utils.util import get_password
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
@@ -79,10 +80,23 @@ def ask_for_bootloader(preset: Bootloader | None) -> Bootloader | tuple[Bootload
 		case ResultType.Selection:
 			selected_bootloader = result.get_value()
 			if selected_bootloader == Bootloader.Grub:
-				bootloader_id = input(str(_("Enter custom --bootloader-id value: "))).strip()
-				if not bootloader_id:
-					print(_("Invalid bootloader ID. Using default 'grub'."))
-					bootloader_id = "grub"
+				header = str(_('Enter bootloader ID for GRUB')) + '\n'
+				result = EditMenu(
+					str(_('Bootloader ID')),
+					header=header,
+					alignment=Alignment.CENTER,
+					allow_skip=True,
+					default_text="grub"
+				).input()
+
+				match result.type_:
+					case ResultType.Skip:
+						bootloader_id = "grub"
+					case ResultType.Selection:
+						bootloader_id = result.text().strip()
+						if not bootloader_id:
+							print(_("Invalid bootloader ID. Using default 'grub'."))
+							bootloader_id = "grub"
 				return (selected_bootloader, bootloader_id)
 			return selected_bootloader
 		case ResultType.Reset:
