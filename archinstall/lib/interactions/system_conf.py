@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from archinstall.tui import Alignment, FrameProperties, FrameStyle, MenuItem, MenuItemGroup, Orientation, PreviewStyle, ResultType, SelectMenu, EditMenu
+from archinstall.tui import Alignment, FrameProperties, FrameStyle, MenuItem, MenuItemGroup, Orientation, PreviewStyle, ResultType, SelectMenu, TextInput, EditMenu
 
 from ..hardware import GfxDriver, SysInfo
 from ..models.bootloader import Bootloader
@@ -50,7 +50,7 @@ def select_kernel(preset: list[str] = []) -> list[str]:
 		case ResultType.Selection:
 			return result.get_values()
 
-def ask_for_bootloader(preset: Bootloader | None) -> Bootloader | tuple[Bootloader, str] | None:
+def ask_for_bootloader(preset: Bootloader | None) -> Bootloader | None:
 	# Systemd is UEFI only
 	if not SysInfo.has_uefi():
 		options = [Bootloader.Grub, Bootloader.Limine]
@@ -97,7 +97,10 @@ def ask_for_bootloader(preset: Bootloader | None) -> Bootloader | tuple[Bootload
 						if not bootloader_id:
 							print(_("Invalid bootloader ID. Using default 'grub'."))
 							bootloader_id = "grub"
-				return (selected_bootloader, bootloader_id)
+				
+				# Store the bootloader ID as an attribute on the bootloader object
+				setattr(selected_bootloader, 'bootloader_id', bootloader_id)
+				return selected_bootloader
 			return selected_bootloader
 		case ResultType.Reset:
 			raise ValueError('Unhandled result type')
