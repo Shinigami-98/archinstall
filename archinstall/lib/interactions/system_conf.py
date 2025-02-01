@@ -49,8 +49,7 @@ def select_kernel(preset: list[str] = []) -> list[str]:
 		case ResultType.Selection:
 			return result.get_values()
 
-
- def ask_for_bootloader(preset: Bootloader | None) -> Bootloader | tuple[Bootloader, str] | None:
+def ask_for_bootloader(preset: Bootloader | None) -> Bootloader | tuple[Bootloader, str] | None:
 	# Systemd is UEFI only
 	if not SysInfo.has_uefi():
 		options = [Bootloader.Grub, Bootloader.Limine]
