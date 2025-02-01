@@ -1168,12 +1168,13 @@ class Installer:
 			if boot_partition.mountpoint and boot_partition.mountpoint != boot_dir:
 				boot_dir_arg.append(f'--boot-directory={boot_partition.mountpoint}')
 				boot_dir = boot_partition.mountpoint
-
+			
+			bootloader_id = self.bootloader_id if hasattr(self, 'bootloader_id') and self.bootloader_id else 'GRUB'
 			add_options = [
 				'--target=x86_64-efi',
 				f'--efi-directory={efi_partition.mountpoint}',
 				*boot_dir_arg,
-				'--bootloader-id=GRUB',
+				f'--bootloader-id={bootloader_id}',
 				'--removable'
 			]
 
