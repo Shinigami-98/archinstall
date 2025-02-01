@@ -50,47 +50,44 @@ def select_kernel(preset: list[str] = []) -> list[str]:
 			return result.get_values()
 
 
- def ask_for_bootloader(preset: Bootloader | None, bootloader_id: str | None = None) -> tuple[Bootloader | None, str | None]:
-    # Systemd is UEFI only
-    if not SysInfo.has_uefi():
-        options = [Bootloader.Grub, Bootloader.Limine]
-        default = Bootloader.Grub
-        header = str(_('UEFI is not detected and some options are disabled'))
-    else:
-        options = [b for b in Bootloader]
-        default = Bootloader.Systemd
-        header = None
+ def ask_for_bootloader(preset: Bootloader | None) -> Bootloader | tuple[Bootloader, str] | None:
+	# Systemd is UEFI only
+	if not SysInfo.has_uefi():
+		options = [Bootloader.Grub, Bootloader.Limine]
+		default = Bootloader.Grub
+		header = str(_('UEFI is not detected and some options are disabled'))
+	else:
+		options = [b for b in Bootloader]
+		default = Bootloader.Systemd
+		header = None
 
-    items = [MenuItem(o.value, value=o) for o in options]
-    group = MenuItemGroup(items)
-    group.set_default_by_value(default)
-    group.set_focus_by_value(preset)
+	items = [MenuItem(o.value, value=o) for o in options]
+	group = MenuItemGroup(items)
+	group.set_default_by_value(default)
+	group.set_focus_by_value(preset)
 
-    result = SelectMenu(
-        group,
-        header=header,
-        alignment=Alignment.CENTER,
-        frame=FrameProperties.min(str(_('Bootloader'))),
-        allow_skip=True
-    ).run()
+	result = SelectMenu(
+		group,
+		header=header,
+		alignment=Alignment.CENTER,
+		frame=FrameProperties.min(str(_('Bootloader'))),
+		allow_skip=True
+	).run()
 
-    match result.type_:
-        case ResultType.Skip:
-            return preset, bootloader_id
-        case ResultType.Selection:
-            selected = result.get_value()
-            if selected == Bootloader.Grub:
-                custom_id = TextInput(
-                    _("Enter Bootloader ID (only for GRUB):"),
-                    default=bootloader_id or "",
-                    alignment=Alignment.CENTER,
-                    frame=FrameProperties.min(str(_('Bootloader ID')))
-                ).run()
-
-                return Bootloader.Grub, custom_id.strip() if custom_id else None
-            return selected, None
-        case ResultType.Reset:
-            raise ValueError(f'Unhandled result type: {result.type_}')
+	match result.type_:
+		case ResultType.Skip:
+			return preset
+		case ResultType.Selection:
+			selected_bootloader = result.get_value()
+			if selected_bootloader == Bootloader.Grub:
+				bootloader_id = input(str(_("Enter custom --bootloader-id value: "))).strip()
+				if not bootloader_id:
+					print(_("Invalid bootloader ID. Using default 'grub'."))
+					bootloader_id = "grub"
+				return (selected_bootloader, bootloader_id)
+			return selected_bootloader
+		case ResultType.Reset:
+			raise ValueError('Unhandled result type')
 
 
 
